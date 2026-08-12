@@ -677,6 +677,7 @@ body {
 
 /* Recursive Observer Self-Frame (Second-Order Observation) */
 .self-frame-container {
+  display: none !important;
   position: absolute;
   top: calc(var(--status-bar-height) + 1.25rem);
   right: 1.75rem;
@@ -858,6 +859,18 @@ body {
   color: var(--text-dim);
   opacity: 0.55;
   border-left-color: transparent;
+}
+
+.step-note a {
+  color: var(--accent);
+  text-decoration: underline;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.step-note a:hover {
+  color: #ff8855;
+  text-shadow: 0 0 8px var(--accent-glow);
 }
 
 .step-note-num {

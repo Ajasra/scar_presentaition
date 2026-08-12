@@ -23,9 +23,7 @@ export class SelfFrameObserver {
     if (!this.container || !this.canvas || !this.ctx) return;
 
     // Reveal self-frame if booted
-    if (this.container.classList.contains('boot-hidden')) {
-      this.container.style.display = 'block';
-    }
+    // display: none !important in main.css handles hiding self-observation for web version
 
     const actNum = typeof snapshot.act === 'number' ? snapshot.act : parseInt(snapshot.act, 10);
     const currentActStr = String(snapshot.act ?? '');

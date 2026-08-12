@@ -18,10 +18,14 @@ export const slide23 = {
           <p style="font-size: 1.25rem; color: var(--text-secondary); max-width: 50rem; line-height: 1.5; margin-bottom: 2.5rem;">
             An irreversible material record enacted together today.
           </p>
-          <div style="font-family: var(--font-mono); font-size: 1.1rem; color: var(--text-dim); display: flex; gap: 2rem; align-items: center;">
+          <div style="font-family: var(--font-mono); font-size: 1rem; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; align-items: center;">
+            <span>Web: <a href="https://sympoietic.systems/" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">sympoietic.systems</a></span>
+            <span style="opacity: 0.4;">|</span>
+            <span>Substack: <a href="https://sympoietic.substack.com/" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">sympoietic.substack.com</a></span>
+            <span style="opacity: 0.4;">|</span>
             <span>Email: <a href="mailto:b@vasily.onl" style="color: var(--accent); text-decoration: none;">b@vasily.onl</a></span>
             <span style="opacity: 0.4;">|</span>
-            <span>IG: <a href="https://instagram.com/vasily_onl" target="_blank" style="color: var(--accent); text-decoration: none;">@vasily_onl</a></span>
+            <span>IG: <a href="https://instagram.com/vasily_onl" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: none;">@vasily_onl</a></span>
           </div>
         </div>
 

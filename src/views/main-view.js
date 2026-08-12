@@ -291,11 +291,7 @@ export class MainViewController {
 
   cleanSpeakerNoteText(rawText) {
     if (!rawText) return 'No speaker notes for this step.';
-    return rawText
-      .replace(/\[[^\]]*\]/g, '')
-      .replace(/\s*\/{1,3}\s*/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    return rawText.trim();
   }
 
   renderSpeakerNotes(snapshot) {
