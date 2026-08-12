@@ -664,20 +664,12 @@ export class RhizomePhysics {
     // 1. Draw Edges
     this.edges.forEach(e => {
       const isSecondaryEdge = e.source.isSecondary || e.target.isSecondary;
-      const isActiveEdge = !this.isRandomMode &&
-        this.activeNodeIds.includes(e.source.id) && this.activeNodeIds.includes(e.target.id);
-      const isScarActiveEdge = !this.isRandomMode &&
-        ((e.source.id === 'SCAR' && this.activeNodeIds.includes(e.target.id)) ||
-         (e.target.id === 'SCAR' && this.activeNodeIds.includes(e.source.id)));
 
       ctx.beginPath();
       ctx.moveTo(e.source.x, e.source.y);
       ctx.lineTo(e.target.x, e.target.y);
 
-      if (isActiveEdge || isScarActiveEdge) {
-        ctx.strokeStyle = 'rgba(255, 140, 60, 0.55)';
-        ctx.lineWidth = 1.1;
-      } else if (isSecondaryEdge) {
+      if (isSecondaryEdge) {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
         ctx.lineWidth = 0.4;
       } else {
@@ -686,6 +678,7 @@ export class RhizomePhysics {
       }
       ctx.stroke();
     });
+
 
     // 1.5 Draw Smooth Fading White Animated Dotted Shortest Path to SCAR + Data Packet Pulse
     const activeHighlightedNode = this.highlightedNodeId ? this.nodeMap.get(this.highlightedNodeId) : null;
