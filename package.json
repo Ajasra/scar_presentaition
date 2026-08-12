@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npm run update-data",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --host",
     "update-data": "node scripts/build-concepts-db.js"
   },
   "devDependencies": {
