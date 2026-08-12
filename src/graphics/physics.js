@@ -400,13 +400,15 @@ export class RhizomePhysics {
     }
 
     // Filter nodes & edges to maintain 100% connected component with SCAR
-    this.nodes = this.nodes.filter(n => connectedToScar.has(n.id));
-    this.nodeMap.clear();
-    this.nodes.forEach(n => this.nodeMap.set(n.id, n));
-    this.edges = this.edges.filter(e => connectedToScar.has(e.source.id) && connectedToScar.has(e.target.id));
-
-    this.activeNodeIds = this.nodes.map(n => n.id);
+    this.activeNodeIds = [];
+    this.nodes.forEach(n => {
+      n.wasEverActive = false;
+      n.burnLevel = 0;
+      n.activeAnim = 0;
+      n.highlightAnim = 0;
+    });
   }
+
 
   // ponytail: BFS shortest path solver from highlighted node to SCAR
   findShortestPathToScar(startId) {
@@ -462,15 +464,15 @@ export class RhizomePhysics {
     }
 
     if (slideIndex === 1 || slideIndex === 23) {
-      // Slide 1 & 23: full 200-node graph active with randomized ticker mode
-      this.activeNodeIds = this.nodes.map(n => n.id);
+      // Slide 1 & 23: ambient graph view without forcing all nodes active
+      this.activeNodeIds = [];
       this.isRandomMode = true;
     } else {
-      // Active content slides: specific active nodes
-      this.activeNodeIds = activeNodeIds.length > 0 ? activeNodeIds : ['SCAR'];
+      // Active content slides: specific active nodes only
+      this.activeNodeIds = activeNodeIds.length > 0 ? activeNodeIds : [];
       this.isRandomMode = false;
 
-      // Ponytail: Accumulate burn-in physical hysteresis memory on active slide nodes
+      // Accumulate burn-in physical hysteresis memory on active slide nodes
       this.activeNodeIds.forEach(id => {
         const node = this.nodeMap.get(id);
         if (node && node.id !== 'SCAR') {
@@ -479,6 +481,7 @@ export class RhizomePhysics {
         }
       });
     }
+
 
     this.tickerIndex = 0;
     this.lastTickerTime = performance.now();
@@ -632,11 +635,10 @@ export class RhizomePhysics {
         avgY = sumY / clusterNodes.length;
       }
 
-      if (false && auraAnim > 0.01) {
-
+      if (auraAnim > 0.01) {
         ctx.save();
-        const auraRadius = isAct3EthicsBloom ? 240 : 190;
-        const maxAlpha = isAct3EthicsBloom ? 0.20 : 0.10;
+        const auraRadius = isAct3EthicsBloom ? 210 : 170;
+        const maxAlpha = 0.07;
         const grad = ctx.createRadialGradient(avgX, avgY, 15, avgX, avgY, auraRadius);
         grad.addColorStop(0, `rgba(255, 87, 34, ${(maxAlpha * auraAnim).toFixed(3)})`);
         grad.addColorStop(0.5, `rgba(255, 87, 34, ${(maxAlpha * 0.3 * auraAnim).toFixed(3)})`);
@@ -647,6 +649,7 @@ export class RhizomePhysics {
         ctx.fill();
         ctx.restore();
       }
+
 
       // Micro Cluster Label Tag
       ctx.save();
@@ -660,16 +663,20 @@ export class RhizomePhysics {
 
     // 1. Draw Edges
     this.edges.forEach(e => {
-      const isEthicsEdge = false;
       const isSecondaryEdge = e.source.isSecondary || e.target.isSecondary;
+      const isActiveEdge = !this.isRandomMode &&
+        this.activeNodeIds.includes(e.source.id) && this.activeNodeIds.includes(e.target.id);
+      const isScarActiveEdge = !this.isRandomMode &&
+        ((e.source.id === 'SCAR' && this.activeNodeIds.includes(e.target.id)) ||
+         (e.target.id === 'SCAR' && this.activeNodeIds.includes(e.source.id)));
 
       ctx.beginPath();
       ctx.moveTo(e.source.x, e.source.y);
       ctx.lineTo(e.target.x, e.target.y);
 
-      if (isEthicsEdge) {
-        ctx.strokeStyle = themeManager.getColor('accentGlow');
-        ctx.lineWidth = 1.5;
+      if (isActiveEdge || isScarActiveEdge) {
+        ctx.strokeStyle = 'rgba(255, 140, 60, 0.55)';
+        ctx.lineWidth = 1.1;
       } else if (isSecondaryEdge) {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
         ctx.lineWidth = 0.4;
@@ -679,7 +686,6 @@ export class RhizomePhysics {
       }
       ctx.stroke();
     });
-
 
     // 1.5 Draw Smooth Fading White Animated Dotted Shortest Path to SCAR + Data Packet Pulse
     const activeHighlightedNode = this.highlightedNodeId ? this.nodeMap.get(this.highlightedNodeId) : null;
@@ -728,8 +734,6 @@ export class RhizomePhysics {
 
     // 2. Draw Nodes (Shapes: Circles for People, Diamonds for Terms, SCAR Anchor)
     this.nodes.forEach(n => {
-      const isEthicsNode = false;
-
       const isScar = n.id === 'SCAR';
       const anim = n.highlightAnim;
       const actAnim = n.activeAnim || 0;
@@ -777,10 +781,6 @@ export class RhizomePhysics {
         ctx.fillStyle = `rgba(240, 240, 250, ${a})`;
         ctx.shadowColor = themeManager.getColor('accentGlow');
         ctx.shadowBlur = Math.round(6 * actAnim);
-      } else if (isEthicsNode) {
-        ctx.fillStyle = accentColor;
-        ctx.shadowColor = themeManager.getColor('accentGlow');
-        ctx.shadowBlur = 4;
       } else if (n.wasEverActive && n.burnLevel > 0) {
         // Ponytail: Burned-in nodes retain warm amber scar trace & subtle glow when inactive
         const bAlpha = (0.20 + 0.45 * n.burnLevel).toFixed(3);
@@ -804,7 +804,7 @@ export class RhizomePhysics {
         if (anim > 0.01) {
           ctx.strokeStyle = `rgba(255, ${Math.round(255 - 168 * anim)}, ${Math.round(255 - 221 * anim)}, ${(0.70 + 0.30 * anim).toFixed(3)})`;
           ctx.lineWidth = 0.8 + 0.4 * anim;
-        } else if (actAnim > 0.01 || isEthicsNode) {
+        } else if (actAnim > 0.01) {
           ctx.strokeStyle = `rgba(255, 255, 255, ${(0.30 + 0.40 * actAnim).toFixed(3)})`;
           ctx.lineWidth = 0.8 + 0.2 * actAnim;
         } else if (n.isSecondary) {
@@ -817,11 +817,13 @@ export class RhizomePhysics {
         ctx.stroke();
       }
 
-      // Subtle Precision Reticle Brackets (┌ ┐ └ ┘) around active ticker node
-      if (anim > 0.08) {
+      // Precision Reticle Brackets (┌ ┐ └ ┘) around active nodes and ticker node
+      const showReticle = anim > 0.08 || (actAnim > 0.1 && n.id !== 'SCAR');
+      if (showReticle) {
         ctx.save();
-        ctx.globalAlpha = 0.30 * anim;
-        ctx.strokeStyle = accentColor;
+        const rAlpha = anim > 0.08 ? (0.30 * anim) : (0.18 * actAnim);
+        ctx.globalAlpha = rAlpha;
+        ctx.strokeStyle = anim > 0.08 ? accentColor : 'rgba(240, 240, 250, 0.8)';
         ctx.lineWidth = 0.8;
         const bSize = pulseRadius + 5;
         const bLen = 3;
@@ -838,19 +840,34 @@ export class RhizomePhysics {
     });
     ctx.shadowBlur = 0;
 
-    // 3. Render persistent faint diagnostic labels for burned-in historical nodes
+    // 3. Render node title labels for active slide nodes & burned-in historical nodes
     ctx.save();
-    ctx.font = '500 10px "Share Tech Mono", "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     this.nodes.forEach(n => {
-      if (n.wasEverActive && n.burnLevel > 0 && n.id !== this.highlightedNodeId && n.id !== 'SCAR') {
-        const lAlpha = (0.12 + 0.28 * n.burnLevel).toFixed(3);
-        ctx.fillStyle = `rgba(226, 135, 67, ${lAlpha})`;
-        ctx.fillText(n.label, n.x, n.y - n.radius - 4);
+      if (n.id !== this.highlightedNodeId && n.id !== 'SCAR') {
+        const isSlideActive = !this.isRandomMode && this.activeNodeIds.includes(n.id);
+        if (isSlideActive && n.activeAnim > 0.05) {
+          ctx.font = '600 12px "Share Tech Mono", "JetBrains Mono", monospace';
+          const lAlpha = (0.40 + 0.55 * n.activeAnim).toFixed(3);
+          ctx.strokeStyle = '#08080f';
+          ctx.lineWidth = 3;
+          ctx.strokeText(n.label, n.x, n.y - n.radius - 6);
+
+          ctx.fillStyle = `rgba(240, 240, 250, ${lAlpha})`;
+          ctx.shadowColor = themeManager.getColor('accentGlow');
+          ctx.shadowBlur = 8;
+          ctx.fillText(n.label, n.x, n.y - n.radius - 6);
+        } else if (n.wasEverActive && n.burnLevel > 0) {
+          ctx.font = '500 10px "Share Tech Mono", "JetBrains Mono", monospace';
+          const lAlpha = (0.12 + 0.28 * n.burnLevel).toFixed(3);
+          ctx.fillStyle = `rgba(226, 135, 67, ${lAlpha})`;
+          ctx.fillText(n.label, n.x, n.y - n.radius - 4);
+        }
       }
     });
     ctx.restore();
+
 
     // 4. Sequential Node Title Text Animation Ticker + Micro Telemetry Readout
     this.renderNodeLabelTicker(ctx, temperature);
@@ -898,8 +915,8 @@ export class RhizomePhysics {
     const hops = pathNodes.length > 0 ? pathNodes.length - 1 : 0;
     const degree = this.edges.filter(e => e.source.id === targetNode.id || e.target.id === targetNode.id).length;
     const padDegree = degree < 10 ? `0${degree}` : `${degree}`;
-    const padHops = hops < 10 ? `0${hops}` : `${hops}`;
-    const telemetry = `[MASS::${padDegree} // HOPS::${padHops}]`;
+    const telemetry = `[MASS::${padDegree}]`;
+
 
     ctx.save();
     ctx.globalAlpha = alpha;

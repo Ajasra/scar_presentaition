@@ -87,7 +87,7 @@ export class MainViewController {
 
     this.logEntriesContainer.innerHTML = `
       <div class="standby-welcome-container">
-        <div class="standby-title mono-font text-accent">SCAR://INIT — TRACING THE SCAR</div>
+        <div class="standby-title mono-font text-accent">TRACING THE SCAR</div>
         <div class="standby-subtitle mono-font text-secondary">ASC Brazil 2026 · Track 3: Hybrid Matters · Vasily Betin</div>
         
         <div class="standby-desc mono-font text-dim">
@@ -101,9 +101,20 @@ export class MainViewController {
         </div>
 
         <div class="standby-start-prompt mono-font pulse text-accent" id="standby-start-btn">
-          [ PRESS ANY KEY OR CLICK TO START PRESENTATION ]
+          [ CLICK OR PRESS ENTER/SPACE TO START PRESENTATION ]
         </div>
+
+        <div class="standby-map-prompt mono-font" style="margin-top: 1.5rem;">
+          <a href="?view=map" target="_blank" class="standby-map-link text-accent" style="text-decoration: none; display: inline-block;">
+            [ EXPLORE CONCEPT MAP (472 NODES) ↗ ]
+          </a>
+          <div class="standby-map-desc mono-font text-dim" style="font-size: 0.8rem; margin-top: 0.5rem; max-width: 600px; line-height: 1.5; opacity: 0.75;">
+            Interactive 2D graph network mapping 472 concept nodes, material traces, and 3,348 theoretical relations across Cybernetics, Agential Realism, Deleuzian Materialism, Ethics, and Media Archaeology.
+          </div>
+        </div>
+
       </div>
+
     `;
 
     const startBtn = document.getElementById('standby-start-btn');
@@ -113,7 +124,15 @@ export class MainViewController {
         this.startBootFromStandby();
       });
     }
+
+    const mapLink = document.querySelector('.standby-map-link');
+    if (mapLink) {
+      mapLink.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    }
   }
+
 
 
   stopStandbySpinner() {
@@ -1553,13 +1572,14 @@ export class MainViewController {
         return;
       }
 
-      // If in standby, trigger boot on ANY keypress (including Left Arrow)
+      // ponytail: if in standby, trigger boot ONLY on explicit Enter, Space, or ArrowRight keypress
       if (!this.bootStarted && !this.bootCompleted) {
-        e.preventDefault();
-        this.startBootFromStandby();
+        if (e.code === 'Enter' || e.code === 'Space' || e.code === 'ArrowRight' || e.code === 'PageDown') {
+          e.preventDefault();
+          this.startBootFromStandby();
+        }
         return;
       }
-
 
       if (this.bootCompleted) {
         if (e.code === 'ArrowRight' || e.code === 'Space' || e.code === 'PageDown') {
@@ -1579,13 +1599,8 @@ export class MainViewController {
         }
       }
     });
-
-    window.addEventListener('click', (e) => {
-      if (!this.bootStarted && !this.bootCompleted) {
-        this.startBootFromStandby();
-      }
-    });
   }
+
 
   triggerNoUndoError() {
     this.slideContainer.classList.add('flash-error');
