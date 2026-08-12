@@ -1,0 +1,62 @@
+{
+  "version": "1.0.0",
+  "theme": {
+    "colors": {
+      "bgDeep": "#05050a",
+      "panelBg": "rgba(10, 10, 18, 0.95)",
+      "textPrimary": "#ffffff",
+      "textSecondary": "#e2e8f0",
+      "textDim": "#cbd5e1",
+      "borderSubtle": "rgba(255, 255, 255, 0.12)",
+      "borderActive": "rgba(255, 255, 255, 0.25)",
+      "accent": "#ff5722",
+      "accentGlow": "rgba(255, 87, 34, 0.5)",
+      "accentBloom": "rgba(255, 87, 34, 0.15)",
+      "accentDim": "rgba(255, 87, 34, 0.25)",
+      "nodeFluid": "rgba(240, 240, 250, 0.28)",
+      "nodeFrozen": "rgba(160, 160, 175, 0.12)",
+      "nodeEdgeFluid": "rgba(255, 255, 255, 0.07)",
+      "nodeEdgeFrozen": "rgba(255, 255, 255, 0.02)"
+    },
+    "typography": {
+      "fontMono": "\"Share Tech Mono\", \"JetBrains Mono\", \"Fira Code\", \"Cascadia Code\", monospace",
+      "fontSans": "\"IBM Plex Sans\", \"Inter\", system-ui, sans-serif",
+      "fontFallback": "monospace",
+      "sizes": {
+        "mega": "clamp(2.2rem, 3.6vw, 3.2rem)",
+        "h1": "clamp(1.5rem, 2.2vw, 2.1rem)",
+        "h2": "clamp(1.3rem, 1.8vw, 1.75rem)",
+        "body": "clamp(1.0rem, 1.35vw, 1.3rem)",
+        "small": "clamp(0.9rem, 1.15vw, 1.1rem)",
+        "micro": "0.95rem"
+      },
+
+      "lineHeights": {
+        "heading": "1.2",
+        "body": "1.6"
+      }
+    },
+    "layout": {
+      "panelMaxWidth": "64rem",
+      "panelPadding": "3rem 4rem",
+      "panelBlur": "4px",
+      "statusBarHeight": "2vh",
+      "footerHeight": "2vh"
+    },
+    "animation": {
+      "typewriterCharMs": 50,
+      "crossfadeMs": 500,
+      "canvasDissolveMs": 800,
+      "orangeShiftMs": 800,
+      "freezeMs": 2000
+    },
+    "canvas": {
+      "nodeCount": 38,
+      "springK": 0.05,
+      "repulsionK": 500,
+      "damping": 0.9,
+      "palimpsestOpacity": 0.04,
+      "burnInOpacity": 0.15
+    }
+  }
+}

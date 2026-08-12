@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,700;1,400&family=Share+Tech+Mono&display=swap');
+
+:root {
+  font-family: var(--font-mono);
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: var(--lh-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .mono-font, .status-bar, .footer, .btn-code {
+  font-family: var(--font-mono);
+}
+
+h1 {
+  font-size: var(--font-h1);
+  line-height: var(--lh-heading);
+  color: var(--text-primary);
+  margin-top: 0;
+}
+
+h2 {
+  font-size: var(--font-h2);
+  line-height: var(--lh-heading);
+  color: var(--text-secondary);
+}
+
+p, td, th, blockquote, li {
+  font-size: var(--font-body);
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+.text-dim {
+  color: var(--text-dim);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
