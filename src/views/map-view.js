@@ -228,13 +228,14 @@ export class MapViewController {
       return `<button class="wikilink-btn mono-font" data-target-id="${targetId}">${displayLabel}</button>`;
     });
 
-    // Clean up empty brackets, empty quotes, extra spaces left by stripped citations
-    cleanText = cleanText
-      .replace(/\s\s+/g, ' ')
-      .replace(/\(\s*\)/g, '')
-      .replace(/\[\s*\]/g, '')
-      .replace(/\s+([.,;:])/g, '$1')
-      .trim();
+    // Clean up trailing/empty citations, brackets, and redundant spaces PER LINE without removing newlines
+    cleanText = cleanText.split('\n').map(line => {
+      return line
+        .replace(/[ \t]{2,}/g, ' ')
+        .replace(/\(\s*\)/g, '')
+        .replace(/\[\s*\]/g, '')
+        .replace(/^[ \t]+|[ \t]+$/g, '');
+    }).join('\n');
 
     return cleanText;
   }
@@ -246,7 +247,6 @@ export class MapViewController {
     // 1. Parse WikiLinks & strip source citations
     let processed = this.parseWikiLinks(text);
 
-
     // 2. Inline Code `code`
     processed = processed.replace(/`([^`]+)`/g, '<code class="detail-code">$1</code>');
 
@@ -257,7 +257,11 @@ export class MapViewController {
     // 4. Italic *text* or _text_
     processed = processed.replace(/(^|[^\w])\*([^*]+)\*/g, '$1<em class="detail-italic">$2</em>');
 
-    // 5. Convert bullet lists (- or *) and blockquotes (> )
+    // 5. Split multi-relation lines (e.g. `entry1 \n entry2` or `entry1: desc entry2: desc`) where entries start with wikilinks/see also
+    // Handle inline list markers like '•' or '- ' inserted without newlines
+    processed = processed.replace(/([^\n])\s*(•|See also:|- See also:)/gi, '$1\n$2');
+
+    // 6. Convert bullet lists (- or * or • or See also:), blockquotes (> ) and normal paragraphs
     const lines = processed.split('\n');
     const outputLines = [];
     let inList = false;
@@ -272,12 +276,22 @@ export class MapViewController {
         continue;
       }
 
-      if (line.startsWith('- ') || line.startsWith('* ')) {
+      const isBullet = line.startsWith('- ') || line.startsWith('* ') || line.startsWith('• ');
+      const isSeeAlso = /^ See also:/i.test(line) || /^See also:/i.test(line) || /^- See also:/i.test(line);
+
+      if (isBullet || isSeeAlso) {
         if (!inList) {
           outputLines.push('<ul class="detail-list">');
           inList = true;
         }
-        const itemContent = line.slice(2).trim();
+        let itemContent = line;
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+          itemContent = line.slice(2).trim();
+        } else if (line.startsWith('• ')) {
+          itemContent = line.slice(2).trim();
+        } else if (line.startsWith('•')) {
+          itemContent = line.slice(1).trim();
+        }
         outputLines.push(`<li class="detail-list-item"><span class="bullet-dot">•</span><span class="list-text">${itemContent}</span></li>`);
       } else if (line.startsWith('> ')) {
         if (inList) {
