@@ -66,8 +66,14 @@ async function run() {
     }
   }
 
+  if (!fs.existsSync(CONCEPTS_DIR)) {
+    console.log(`Obsidian concepts source folder (${CONCEPTS_DIR}) not found. Using committed concept-database.js.`);
+    return;
+  }
+
   scanDir(CONCEPTS_DIR);
   console.log(`Found ${conceptFiles.length} markdown concept files in ${CONCEPTS_DIR}`);
+
 
   const conceptsMap = {};
 
