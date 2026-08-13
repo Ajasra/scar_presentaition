@@ -3,12 +3,13 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   base: './',
   server: {
-    port: 8742,
+    port: 8745,
     host: true, // Listen on all local IPs for cross-device presentation on local Wi-Fi
     open: false
   },
   preview: {
-    port: 8742,
+    port: 8745,
+    strictPort: true,
     host: true
   },
   build: {

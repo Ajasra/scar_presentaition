@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 8742",
+    "dev": "vite --port 8745",
     "prebuild": "npm run update-data",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 8742",
-    "start": "vite preview --host 0.0.0.0 --port 8742",
+    "preview": "vite preview --host 0.0.0.0 --port 8745 --strictPort",
+    "start": "vite preview --host 0.0.0.0 --port 8745 --strictPort",
     "update-data": "node scripts/build-concepts-db.js"
   },
   "devDependencies": {
