@@ -5,12 +5,14 @@ export default defineConfig({
   server: {
     port: 8745,
     host: true, // Listen on all local IPs for cross-device presentation on local Wi-Fi
+    allowedHosts: true,
     open: false
   },
   preview: {
     port: 8745,
     strictPort: true,
-    host: true
+    host: true,
+    allowedHosts: true
   },
   build: {
     target: 'esnext',
