@@ -306,6 +306,18 @@ export class MainViewController {
         appState.prevSlide();
       });
     }
+
+    // ponytail: bind multilingual language switcher buttons
+    const langBtns = document.querySelectorAll('#notes-lang-switch .btn-lang');
+    langBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const lang = btn.getAttribute('data-lang');
+        if (lang) {
+          appState.setNotesLanguage(lang);
+        }
+      });
+    });
   }
 
   cleanSpeakerNoteText(rawText) {
@@ -316,6 +328,17 @@ export class MainViewController {
   renderSpeakerNotes(snapshot) {
     const noteEl = document.getElementById('pres-note-current');
     const badgeEl = document.getElementById('pres-step-badge');
+
+    // Update active language toggle button
+    const langBtns = document.querySelectorAll('#notes-lang-switch .btn-lang');
+    langBtns.forEach(btn => {
+      const lang = btn.getAttribute('data-lang');
+      if (lang === snapshot.notesLanguage) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
 
     if (badgeEl) {
       badgeEl.textContent = `[STEP ${snapshot.stepIndex + 1} OF ${snapshot.maxSteps}]`;

@@ -14,6 +14,7 @@ export class PresentationState {
     this.startTime = null;
     this.triggersFired = [false, false, false, false];
     this.listeners = [];
+    this.notesLanguage = (typeof localStorage !== 'undefined' && localStorage.getItem('scar_speaker_notes_lang')) || 'en';
 
     // Parse URL parameter ?slide=XX or ?slide=2 for direct dev jump
     const urlParams = new URLSearchParams(window.location.search);
@@ -56,19 +57,41 @@ export class PresentationState {
     this.listeners.forEach(cb => cb(data));
   }
 
+  // ponytail: seamless language switcher for speaker notes
+  setNotesLanguage(lang) {
+    if (['en', 'pt', 'ru', 'zh'].includes(lang)) {
+      this.notesLanguage = lang;
+      try {
+        localStorage.setItem('scar_speaker_notes_lang', lang);
+      } catch (e) {}
+      this.notify();
+    }
+  }
+
   getMaxStepsForSlide(slideIdx = this.slideIndex) {
     const slideId = slideIdx + 1;
     const noteObj = speakerNotesData[slideId];
-    return (noteObj && noteObj.notes && noteObj.notes.length > 0) ? noteObj.notes.length : 1;
+    if (!noteObj || !noteObj.notes) return 1;
+    const notesArray = Array.isArray(noteObj.notes)
+      ? noteObj.notes
+      : (noteObj.notes[this.notesLanguage] || noteObj.notes.en || []);
+    return notesArray.length > 0 ? notesArray.length : 1;
   }
 
-  getAllNotesForSlide(slideIdx = this.slideIndex) {
+  getAllNotesForSlide(slideIdx = this.slideIndex, lang = this.notesLanguage) {
     const slideId = slideIdx + 1;
     const noteObj = speakerNotesData[slideId];
-    if (!noteObj || !noteObj.notes || noteObj.notes.length === 0) {
+    if (!noteObj || !noteObj.notes) {
       return ["No speaker notes for this slide."];
     }
-    return noteObj.notes;
+    if (Array.isArray(noteObj.notes)) {
+      return noteObj.notes;
+    }
+    const localized = noteObj.notes[lang] || noteObj.notes.en;
+    if (!localized || localized.length === 0) {
+      return ["No speaker notes for this slide."];
+    }
+    return localized;
   }
 
   getCurrentSpeakerNote() {
@@ -89,6 +112,7 @@ export class PresentationState {
       entropy: Math.min(100, Math.floor(this.entropy)),
       isFrozen: this.isFrozen,
       showBackgroundLog: this.showBackgroundLog,
+      notesLanguage: this.notesLanguage,
       interactionCount: this.interactionCount,
       elapsedSeconds: this.startTime ? Math.floor((Date.now() - this.startTime) / 1000) : 0,
       triggersFired: [...this.triggersFired],

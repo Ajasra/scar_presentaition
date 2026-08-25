@@ -23,7 +23,7 @@ export class PresenterView {
       <div class="presenter-layout">
         <div class="presenter-notes">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
-            <h2 class="mono-font text-accent" style="margin: 0;">SPEAKER TELEPROMPTER NOTES</h2>
+            <h2 class="mono-font text-accent" style="margin: 0; font-size: 1.1rem;">SPEAKER TELEPROMPTER NOTES</h2>
             <span id="pres-step-badge" class="mono-font text-secondary" style="font-size: 0.9rem;">[STEP 1 OF 1]</span>
           </div>
           <div id="pres-notes-text"></div>
@@ -40,9 +40,15 @@ export class PresenterView {
         </div>
 
         <div class="presenter-controls">
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn-ctrl" id="btn-prev" style="flex: 1;">◀ PREVIOUS</button>
-            <button class="btn-ctrl" id="btn-next" style="flex: 2; background: rgba(255,87,34,0.2); border-color: var(--accent);">NEXT SLIDE ▶</button>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn-ctrl" id="btn-prev" style="flex: 1;">◀ PREV</button>
+            <div class="notes-lang-switch mono-font" id="pres-lang-switch">
+              <button type="button" class="btn-lang active" data-lang="en">EN</button>
+              <button type="button" class="btn-lang" data-lang="pt">PT</button>
+              <button type="button" class="btn-lang" data-lang="ru">RU</button>
+              <button type="button" class="btn-lang" data-lang="zh">ZH</button>
+            </div>
+            <button class="btn-ctrl" id="btn-next" style="flex: 1.5; background: rgba(255,87,34,0.2); border-color: var(--accent);">NEXT ▶</button>
           </div>
           <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
             <button class="btn-ctrl" id="btn-log" style="flex: 1;">TOGGLE FORENSIC LOG</button>
@@ -66,6 +72,18 @@ export class PresenterView {
 
     document.getElementById('btn-prev').addEventListener('click', () => {
       appState.prevSlide();
+    });
+
+    // ponytail: presenter view language switcher listeners
+    const langBtns = document.querySelectorAll('#pres-lang-switch .btn-lang');
+    langBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const lang = btn.getAttribute('data-lang');
+        if (lang) {
+          appState.setNotesLanguage(lang);
+        }
+      });
     });
 
     document.getElementById('btn-log').addEventListener('click', () => {
@@ -110,7 +128,7 @@ export class PresenterView {
 
   updateView(snapshot) {
     // Only update if snapshot actually changed state to avoid unnecessary DOM work on 1s timer ticks
-    const stateKey = `${snapshot.slideIndex}_${snapshot.stepIndex}_${snapshot.showBackgroundLog}_${snapshot.entropy}_${snapshot.zRegister}`;
+    const stateKey = `${snapshot.slideIndex}_${snapshot.stepIndex}_${snapshot.notesLanguage}_${snapshot.showBackgroundLog}_${snapshot.entropy}_${snapshot.zRegister}`;
     if (this._lastStateKey === stateKey) return;
     this._lastStateKey = stateKey;
 
@@ -124,6 +142,17 @@ export class PresenterView {
     const slideNumEl = document.getElementById('pres-slide-num');
     const entropyEl = document.getElementById('pres-entropy');
     const regEl = document.getElementById('pres-z-reg');
+
+    // Update active language toggle button in presenter view
+    const langBtns = document.querySelectorAll('#pres-lang-switch .btn-lang');
+    langBtns.forEach(btn => {
+      const lang = btn.getAttribute('data-lang');
+      if (lang === snapshot.notesLanguage) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
 
     const btnLog = document.getElementById('btn-log');
     if (btnLog) {
@@ -142,13 +171,14 @@ export class PresenterView {
     }
 
     if (notesEl) {
-      if (this.currentNotesSlideIdx !== snapshot.slideIndex) {
+      if (this.currentNotesSlideIdx !== snapshot.slideIndex || this.currentNotesLang !== snapshot.notesLanguage) {
         const allNotes = snapshot.allSlideNotes || [];
         notesEl.innerHTML = allNotes.map((noteText, idx) => {
           const numPrefix = `${idx + 1} > `;
           return `<div class="step-note step-note-item" data-idx="${idx}"><span class="step-note-num">${numPrefix}</span>${noteText}</div>`;
         }).join('');
         this.currentNotesSlideIdx = snapshot.slideIndex;
+        this.currentNotesLang = snapshot.notesLanguage;
       }
 
       // Update active note class smoothly without destroying HTML
@@ -171,13 +201,16 @@ export class PresenterView {
     }
 
     if (nextEl) {
-      nextEl.innerHTML = nextSlide ? `<strong class="text-accent" style="display: block; margin-bottom: 0.25rem;">Slide ${nextSlide.id}: ${nextSlide.title}</strong><span>${nextSlide.speakerNotes || ''}</span>` : "End of presentation.";
+      const nextNotes = nextSlide ? appState.getAllNotesForSlide(snapshot.slideIndex + 1, snapshot.notesLanguage) : [];
+      const nextCue = nextNotes && nextNotes[0] ? nextNotes[0] : (nextSlide?.speakerNotes || '');
+      nextEl.innerHTML = nextSlide ? `<strong class="text-accent" style="display: block; margin-bottom: 0.25rem;">Slide ${nextSlide.id}: ${nextSlide.title}</strong><span>${nextCue}</span>` : "End of presentation.";
     }
 
     if (slideNumEl) {
       slideNumEl.textContent = `SLIDE ${String(snapshot.slideIndex + 1).padStart(2, '0')} / ${snapshot.totalSlides} (STEP ${snapshot.stepIndex + 1}/${snapshot.maxSteps})`;
     }
     if (entropyEl) entropyEl.textContent = `${snapshot.entropy}%`;
+    if (regEl) regEl.textContent = snapshot.zRegister;
     if (regEl) regEl.textContent = snapshot.zRegister;
   }
 }
