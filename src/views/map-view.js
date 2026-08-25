@@ -92,6 +92,17 @@ export class MapViewController {
     setTimeout(updateSize, 50);
 
     this.renderer.start();
+
+    // Deep-linking: auto-select node from ?node= URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetNodeId = urlParams.get('node');
+    if (targetNodeId) {
+      setTimeout(() => {
+        if (this.renderer) {
+          this.renderer.selectNodeById(targetNodeId);
+        }
+      }, 120);
+    }
   }
 
   bindEvents() {

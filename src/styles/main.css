@@ -227,6 +227,25 @@ body {
   margin: 0;
 }
 
+/* Deep-linked Concept / People links in Speaker Notes */
+.note-concept-link {
+  color: var(--accent);
+  text-decoration: underline dotted 1px rgba(255, 87, 34, 0.7);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: all 160ms ease;
+  font-weight: 500;
+  display: inline;
+}
+
+.note-concept-link:hover {
+  color: #ffffff;
+  background: rgba(255, 87, 34, 0.22);
+  text-decoration: underline solid 1px var(--accent);
+  box-shadow: 0 0 8px rgba(255, 87, 34, 0.45);
+  border-radius: 2px;
+}
+
 
 
 

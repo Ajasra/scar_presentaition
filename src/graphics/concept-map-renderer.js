@@ -220,9 +220,22 @@ export class ConceptMapRenderer {
   }
 
   selectNodeById(nodeId) {
-    const node = this.nodeMap.get(nodeId);
+    if (!nodeId) return;
+    let node = this.nodeMap.get(nodeId);
+    if (!node) {
+      const lower = nodeId.toLowerCase().replace(/ /g, '-');
+      for (const [id, n] of this.nodeMap.entries()) {
+        if (id.toLowerCase() === lower || id.toLowerCase() === nodeId.toLowerCase()) {
+          node = n;
+          break;
+        }
+      }
+    }
     if (node) {
       this.selectNode(node);
+      if (this.targetZoom < 1.0) {
+        this.targetZoom = 1.35;
+      }
     }
   }
 
