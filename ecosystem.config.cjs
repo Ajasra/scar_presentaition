@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: "scar-presentation",
-      script: "npm",
-      args: "run start",
+      script: "node",
+      args: "./node_modules/vite/bin/vite.js preview --port 8745 --host",
       env: {
         NODE_ENV: "production",
         PORT: 8745
